@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from middleware.auth_middleware import get_current_user_id
+from models.user import User
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -43,3 +45,30 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         password=data.password
     )
     return result
+
+#Тестовый запрос для проверки авторизации
+@router.get("/me")
+def get_me(
+    current_user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == current_user_id).first()
+
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Пользователь не найден"
+        )
+
+    return {
+        "message": "Ты авторизован",
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "surname": user.surname,
+            "email": user.email,
+            "phone": user.phone,
+            "role": user.role,
+            "created_at": user.created_at
+        }
+    }
