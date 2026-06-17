@@ -1,27 +1,17 @@
-from flask import Flask
-from config import Config
-from db import db
+from fastapi import FastAPI
+
+from db import init_db, engine, Base
+from routes.auth_routes import router as auth_router
+
+app = FastAPI(title="Shop API", version="1.0.0")
+
+# Создаём таблицы при старте
+Base.metadata.create_all(bind=engine)
+
+# Подключаем роуты
+app.include_router(auth_router)
 
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
-
-    db.init_app(app)
-
-    @app.route("/")
-    def home():
-        return {"message": "API работает!"}
-
-    from routes.auth_routes import auth_bp
-    app.register_blueprint(auth_bp, url_prefix="/api/auth")
-
-    with app.app_context():
-        db.create_all()
-
-    return app
-
-
-if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True)
+@app.get("/")
+def home():
+    return {"message": "API работает!"}

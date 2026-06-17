@@ -1,13 +1,14 @@
-from db import db
+from sqlalchemy import Column, Integer, String, DateTime
+from db import Base
 
-class User(db.Model):
+class User(Base):
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    surname = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    phone = db.Column(db.String(20), nullable=True)
-    role = db.Column(db.String(50), nullable=False, default="user")
-    created_at = db.Column(db.DateTime, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    surname = Column(String(100), nullable=False)
+    email = Column(String(150), unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    phone = Column(String(20), nullable=True)
+    role = Column(String(50), nullable=False, default="user")
+    created_at = Column(DateTime, nullable=False)

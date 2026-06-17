@@ -1,22 +1,18 @@
-from functools import wraps
-from flask import request, jsonify
+from fastapi import Header, HTTPException, Depends
+from sqlalchemy.orm import Session
+
+from db import get_db
 from utils.jwt_utils import decode_token
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        if "Authorization" in request.headers:
-            auth_header = request.headers["Authorization"]
-            if auth_header.startswith("Bearer "):
-                token = auth_header.split(" ")[1]
 
-        if not token:
-            return jsonify({"error": "Токен отсутствует"}), 401
+def get_current_user_id(authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Токен отсутствует")
 
-        user_id = decode_token(token)
-        if not user_id:
-            return jsonify({"error": "Токен недействителен или истёк"}), 401
+    token = authorization.split(" ")[1]
+    user_id = decode_token(token)
 
-        return f(user_id, *args, **kwargs)
-    return decorated
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Токен недействителен или истёк")
+
+    return user_id

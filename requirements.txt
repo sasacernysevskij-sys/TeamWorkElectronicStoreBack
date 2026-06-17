@@ -1,4 +1,5 @@
-flask
-flask-sqlalchemy
-werkzeug
+fastapi
+uvicorn
+sqlalchemy
 pyjwt
+werkzeug
