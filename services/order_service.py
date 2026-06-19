@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from models.cart_item import CartItem
 from models.product import Product
 from models.order import Order
@@ -133,3 +135,113 @@ class OrderService:
             })
 
         return result, 200
+
+    def get_all_orders_admin(self, db, skip=0, limit=10):
+        orders = (
+            db.query(Order)
+            .order_by(Order.total_price.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+        return [
+            {
+                "id": order.id,
+                "user_id": order.user_id,
+                "status": order.status,
+                "total_price": order.total_price,
+                "created_at": str(order.created_at)
+            }
+            for order in orders
+        ], 200
+
+    def get_orders_count_admin(self, db):
+        count = db.query(Order).count()
+
+        return {
+            "orders_count": count
+        }, 200
+
+    def get_last_month_orders_sum_admin(self, db):
+        date_from = datetime.utcnow() - timedelta(days=30)
+
+        orders = db.query(Order).filter(Order.created_at >= date_from).all()
+
+        total_sum = 0
+
+        for order in orders:
+            total_sum += order.total_price
+
+        return {
+            "period": "last_30_days",
+            "orders_count": len(orders),
+            "total_sum": total_sum
+        }, 200
+
+    def get_last_month_orders_admin(self, db, skip=0, limit=10):
+        date_from = datetime.utcnow() - timedelta(days=30)
+
+        orders = (
+            db.query(Order)
+            .filter(Order.created_at >= date_from)
+            .order_by(Order.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+        return [
+            {
+                "id": order.id,
+                "user_id": order.user_id,
+                "status": order.status,
+                "total_price": order.total_price,
+                "created_at": str(order.created_at)
+            }
+            for order in orders
+        ], 200
+
+    def get_order_items_by_order_id_admin(self, db, order_id):
+        order = db.query(Order).filter(Order.id == order_id).first()
+
+        if order is None:
+            return {
+                "detail": "Заказ не найден"
+            }, 404
+
+        order_items = db.query(OrderItem).filter(OrderItem.order_id == order_id).all()
+
+        result = []
+
+        for order_item in order_items:
+            product = db.query(Product).filter(Product.id == order_item.product_id).first()
+
+            product_name = None
+            article = None
+
+            if product is not None:
+                product_name = product.name
+                article = product.article
+
+            result.append({
+                "id": order_item.id,
+                "order_id": order_item.order_id,
+                "product_id": order_item.product_id,
+                "product_name": product_name,
+                "article": article,
+                "quantity": order_item.quantity,
+                "price": order_item.price,
+                "subtotal": order_item.price * order_item.quantity
+            })
+
+        return {
+            "order": {
+                "id": order.id,
+                "user_id": order.user_id,
+                "status": order.status,
+                "total_price": order.total_price,
+                "created_at": str(order.created_at)
+            },
+            "items": result
+        }, 200
