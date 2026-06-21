@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from db import engine, Base
 
@@ -17,13 +18,19 @@ from routes.user_routes import router as user_router
 
 app = FastAPI(title="Shop API", version="1.0.0")
 
+# Разрешаем CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Создаём таблицы при старте
 Base.metadata.create_all(bind=engine)
 
-
 # Подключаем роуты
-
 app.include_router(auth_router)
 app.include_router(product_router)
 app.include_router(cart_router)
