@@ -12,11 +12,14 @@ class ProductService:
         query = db.query(Product)
 
         if product_type:
-            query = query.filter(Product.product_type == product_type)
+           query = query.filter(Product.product_type == product_type)
 
+        total = query.count()
         products = query.offset(skip).limit(limit).all()
 
-        return [
+        return {
+        "total": total,
+        "products": [
             {
                 "id": product.id,
                 "name": product.name,
@@ -29,7 +32,8 @@ class ProductService:
                 "image_url": product.image_url
             }
             for product in products
-        ], 200
+        ]
+    }, 200
 
     def create_product(
         self,

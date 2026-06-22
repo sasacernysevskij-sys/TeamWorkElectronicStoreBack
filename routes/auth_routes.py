@@ -72,3 +72,11 @@ def get_me(
             "created_at": user.created_at
         }
     }
+@router.post("/make-admin")
+def make_admin(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"error": "Пользователь не найден"}
+    user.role = "admin"
+    db.commit()
+    return {"message": f"Пользователь {email} теперь админ"}
