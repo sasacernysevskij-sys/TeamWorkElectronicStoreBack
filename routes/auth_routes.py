@@ -3,7 +3,7 @@ from middleware.auth_middleware import get_current_user_id
 from models.user import User
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-
+from fastapi.responses import JSONResponse
 from db import get_db
 from services.auth_service import AuthService
 
@@ -17,13 +17,14 @@ class RegisterRequest(BaseModel):
     name: str
     surname: str
     phone: str = ""
-
-
 class LoginRequest(BaseModel):
     email: str
     password: str
-
-
+class ForgotPasswordRequest(BaseModel):
+    email: str
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 @router.post("/register")
 def register(data: RegisterRequest, db: Session = Depends(get_db)):
     result, status_code = auth_service.register(
@@ -80,3 +81,13 @@ def make_admin(email: str, db: Session = Depends(get_db)):
     user.role = "admin"
     db.commit()
     return {"message": f"Пользователь {email} теперь админ"}
+@router.post("/forgot-password")
+def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    result, status_code = auth_service.forgot_password(db=db, email=data.email)
+    return JSONResponse(status_code=status_code, content=result)
+@router.post("/reset-password")
+def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
+    result, status_code = auth_service.reset_password(
+        db=db, token=data.token, new_password=data.new_password
+    )
+    return JSONResponse(status_code=status_code, content=result)

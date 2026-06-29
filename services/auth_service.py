@@ -73,3 +73,38 @@ class AuthService:
                 "created_at": user.created_at.isoformat()
             }
         }, 200
+
+    def forgot_password(self, db, email):
+        """Генерирует токен сброса пароля"""
+        import uuid
+        from datetime import datetime, timedelta
+
+        user = db.query(User).filter_by(email=email).first()
+        if not user:
+            return {"message": "Если почта зарегистрирована, ссылка отправлена"}, 200
+
+        # Генерируем токен
+        reset_token = str(uuid.uuid4())
+        user.reset_token = reset_token
+        user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+        db.commit()
+        return {"message": "Если почта зарегистрирована, ссылка отправлена"}, 200
+
+    def reset_password(self, db, token, new_password):
+        """Меняет пароль по токену"""
+        from datetime import datetime
+        from werkzeug.security import generate_password_hash
+
+        user = db.query(User).filter_by(reset_token=token).first()
+        if not user:
+            return {"error": "Недействительная ссылка"}, 400
+
+        if user.reset_token_expires < datetime.utcnow():
+            return {"error": "Срок действия ссылки истёк"}, 400
+
+        user.password_hash = generate_password_hash(new_password)
+        user.reset_token = None
+        user.reset_token_expires = None
+        db.commit()
+
+        return {"message": "Пароль успешно изменён"}, 200

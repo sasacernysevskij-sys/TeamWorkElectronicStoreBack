@@ -1,12 +1,57 @@
 from datetime import datetime, timedelta
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 from models.cart_item import CartItem
 from models.product import Product
 from models.order import Order
 from models.order_item import OrderItem
+from models.user import User
+from config import SMTP_HOST, SMTP_PORT, SMTP_EMAIL, SMTP_PASSWORD
 
 
 class OrderService:
+
+    def send_order_email(self, db, user_id, order_id, total_price, items):
+        """Отправляет письмо с подтверждением заказа"""
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return
+
+        items_text = ""
+        for item in items:
+            items_text += f"- {item['name']}: {item['quantity']} x {item['price']}₴ = {item['subtotal']}₴\n"
+
+        msg = MIMEMultipart()
+        msg["Subject"] = f"Замовлення №{order_id} оформлено"
+        msg["From"] = SMTP_EMAIL
+        msg["To"] = user.email
+
+        body = f"""Дякуємо за замовлення!
+
+Номер замовлення: #{order_id}
+Сума: {total_price}₴
+
+Товари:
+{items_text}
+
+Статус: new
+Очікуйте повідомлення про відправку.
+
+З повагою, M·TAC Shop
+"""
+        msg.attach(MIMEText(body, "plain", "utf-8"))
+
+        try:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+                server.starttls()
+                server.login(SMTP_EMAIL, SMTP_PASSWORD)
+                server.sendmail(SMTP_EMAIL, user.email, msg.as_string())
+            print(f"Письмо отправлено на {user.email}")
+        except Exception as e:
+            print(f"Ошибка отправки письма: {e}")
+
     def create_order(self, db, user_id):
         cart_items = db.query(CartItem).filter(CartItem.user_id == user_id).all()
 
@@ -42,7 +87,6 @@ class OrderService:
                     "quantity": cart_item.quantity,
                     "subtotal": subtotal
                 })
-
             order = Order(
                 user_id=user_id,
                 status="new",
@@ -81,6 +125,15 @@ class OrderService:
 
             db.commit()
             db.refresh(order)
+
+            # Отправляем письмо
+            self.send_order_email(
+                db=db,
+                user_id=user_id,
+                order_id=order.id,
+                total_price=total_price,
+                items=order_items_response
+            )
 
             return {
                 "message": "Заказ успешно создан",

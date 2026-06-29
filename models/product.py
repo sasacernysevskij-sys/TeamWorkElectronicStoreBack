@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, Text
-
+from sqlalchemy import Column, Integer, String, Float, Text, DateTime
+from datetime import datetime
 from db import Base
-
 
 class Product(Base):
     __tablename__ = "products"
@@ -15,3 +14,4 @@ class Product(Base):
     stock = Column(Integer, nullable=False, default=0)
     rating = Column(Float, nullable=True, default=0.0)
     image_url = Column(String(500), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)

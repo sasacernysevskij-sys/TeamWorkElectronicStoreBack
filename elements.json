@@ -11,7 +11,7 @@
 },
 {
   "name": "M-Tac мультитул Type 1 Steel",
-  "article": "23426076",
+  "article": "23426076", 
   "description": "Сучасний мультитул від бренду M-TAC оснащений всіма необхідними інструментами, які можуть знадобитись як у повсякденному житті, так і під час тривалого перебування у польових умовах.Виготовлений з нержавіючої сталі 440С марки, що гарантує довговічність та міцність інструментів навіть при довготривалому їх застосуванні. ",
   "price": 579,
   "product_type": "Knives and Tools",
@@ -98,5 +98,45 @@
   "stock": 99,
   "rating": 4.7 ,
   "image_url": "https://www.mtac.ua/cache/original/product/86866/b2ebb9449c5211e680d5001e67ad8c07/ed57dc505568236886eb0ab558550f6a.jpg"
+},
+{
+  "name": "кросівки Shooter Black",
+  "article": "866588",
+  "description": "Головною особливістю кросівок є протектор підвищеного зчеплення з ламелями (додатковими ребрами на шипах підошви), які покращують стабільність під час руху по різних типах поверхні.",
+  "price": 2150,
+  "product_type": "shoes",
+  "stock": 78,
+  "rating": 5,
+  "image_url": "https://www.mtac.ua/cache/medium/product/159142/4a55f40b332711f1812faab9975c17d0/30809002-1.jpg"
+},
+{
+  "name": "M-Tac шорти Sturm Gen.II NYCO",
+  "article": "43523538",
+  "description": "Пошиті з високоякісного матеріалу Nyco Extreme (57% нейлон, 43% бавовна) від американської компанії Brookwood. Дана тканина вражає показниками міцності, зносостійкості та повітропроникності",
+  "price": 5200,
+  "product_type": "shorts",
+  "stock": 72,
+  "rating": 4.5,
+  "image_url": "https://www.mtac.ua/cache/original/product/9812/a6fc9c0efb2e11ee8113aab9975c17d0/3610wm4k9dmn0opw4i9lcbbglov65acb.jpg"
+},
+{
+  "name": "M-Tac сумка транспортна 185л",
+  "article": "4324702",
+  "description": "Конструкція сумки включає одне основне відділення, що відкривається за принципом валізи. Внутрішній простір оснащений двома поличками на велкро кріпленнях, які дозволяють легко змінювати їхнє положення.",
+  "price": 15500,
+  "product_type": "bag",
+  "stock": 72,
+  "rating": 4.7,
+  "image_url": "https://www.mtac.ua/cache/medium/product/158539/c32618de79bd11f08129aab9975c17d0/10512005-1.jpg"
+},
+{
+  "name": "M-Tac чохол бронежилета Sturm Gen.II",
+  "article": "992844",
+  "description": "Основною особливістю M-TAC ЧОХОЛ БРОНЕЖИЛЕТА STURM GEN.II ELITE та її головною відмінністю від попередніх генерацій - є фастекси швидкого скидання з фурнітури Duraflex, які розміщені на камербанді",
+  "price": 11500,
+  "product_type": "bodyArmor",
+  "stock": 61,
+  "rating": 4.9,
+  "image_url": "https://www.mtac.ua/cache/original/product/85890/1164f188799111ef8117aab9975c17d0/10417008-1.jpg"
 }
 ]

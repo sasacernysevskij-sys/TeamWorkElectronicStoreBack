@@ -7,33 +7,43 @@ class ProductService:
         db,
         product_type=None,
         skip=0,
-        limit=10
+        limit=10,
+        search=None,
+        is_new=None
     ):
         query = db.query(Product)
 
         if product_type:
-           query = query.filter(Product.product_type == product_type)
+            query = query.filter(Product.product_type == product_type)
+
+        if search:
+            query = query.filter(Product.name.ilike(f"%{search}%"))
+
+        if is_new:
+            from datetime import datetime, timedelta
+            week_ago = datetime.utcnow() - timedelta(days=7)
+            query = query.filter(Product.created_at >= week_ago)
 
         total = query.count()
-        products = query.offset(skip).limit(limit).all()
+        products = query.order_by(Product.created_at.desc()).offset(skip).limit(limit).all()
 
         return {
-        "total": total,
-        "products": [
-            {
-                "id": product.id,
-                "name": product.name,
-                "article": product.article,
-                "description": product.description,
-                "price": product.price,
-                "product_type": product.product_type,
-                "stock": product.stock,
-                "rating": product.rating,
-                "image_url": product.image_url
-            }
+            "total": total,
+            "products": [
+                {
+                    "id": product.id,
+                    "name": product.name,
+                    "article": product.article,
+                    "description": product.description,
+                    "price": product.price,
+                    "product_type": product.product_type,
+                    "stock": product.stock,
+                    "rating": product.rating,
+                    "image_url": product.image_url
+                }
             for product in products
-        ]
-    }, 200
+            ]
+        }, 200
 
     def create_product(
         self,
@@ -162,3 +172,44 @@ class ProductService:
             "rating": product.rating,
             "image_url": product.image_url
         }, 200
+
+    def import_from_json(self, db, filepath="elements.json"):
+        import json
+
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                products_data = json.load(f)
+        except FileNotFoundError:
+            return {"detail": "Файл elements.json не найден"}, 404
+        except json.JSONDecodeError:
+            return {"detail": "Ошибка чтения JSON"}, 400
+
+        imported = 0
+        skipped = 0
+
+        for item in products_data:
+            existing = db.query(Product).filter(Product.article == item.get("article")).first()
+            if existing:
+                skipped += 1
+                continue
+
+            product = Product(
+                name=item.get("name", ""),
+                article=item.get("article", ""),
+                description=item.get("description", ""),
+                price=item.get("price", 0),
+                product_type=item.get("product_type", ""),
+                stock=item.get("stock", 0),
+                rating=item.get("rating", 0.0),
+                image_url=item.get("image_url", "")
+            )
+            db.add(product)
+            imported += 1
+
+        db.commit()
+
+        return {
+            "message": "Импорт завершён",
+            "imported": imported,
+            "skipped": skipped
+        }, 201

@@ -39,6 +39,8 @@ class ProductUpdateRequest(BaseModel):
 @router.get("")
 def get_products(
     product_type: Optional[str] = Query(default=None),
+    search: Optional[str] = Query(default=None),
+    is_new: Optional[str] = Query(default=None),
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=100),
     db: Session = Depends(get_db)
@@ -46,14 +48,12 @@ def get_products(
     result, status_code = product_service.get_products(
         db=db,
         product_type=product_type,
+        search=search,
+        is_new=is_new,
         skip=skip,
         limit=limit
     )
-
-    return JSONResponse(
-        status_code=status_code,
-        content=result
-    )
+    return JSONResponse(status_code=status_code, content=result)
 
 
 @router.post("")
@@ -121,3 +121,12 @@ def delete_product(
         status_code=status_code,
         content=result
     )
+
+
+@router.post("/import")
+def import_products(
+    current_admin=Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    result, status_code = product_service.import_from_json(db=db)
+    return JSONResponse(status_code=status_code, content=result)

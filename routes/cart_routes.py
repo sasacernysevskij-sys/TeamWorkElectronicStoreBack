@@ -86,3 +86,19 @@ def update_cart_item(
         status_code=status_code,
         content=result
     )
+@router.delete("/items/{product_id}")
+def remove_cart_item(
+    product_id: int,
+    current_user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    result, status_code = cart_service.remove_cart_item(
+        db=db,
+        user_id=current_user_id,
+        product_id=product_id
+    )
+
+    return JSONResponse(
+        status_code=status_code,
+        content=result
+    )

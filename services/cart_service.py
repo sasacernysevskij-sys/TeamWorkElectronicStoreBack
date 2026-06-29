@@ -151,3 +151,18 @@ class CartService:
             "product_id": cart_item.product_id,
             "quantity": cart_item.quantity
         }, 200
+    def remove_cart_item(self, db, user_id, product_id):
+        cart_item = (
+            db.query(CartItem)
+            .filter(
+                CartItem.user_id == user_id,
+                CartItem.product_id == product_id
+            )
+            .first()
+        )
+        if cart_item is None:
+            return {"detail": "Товар не найден в корзине"}, 404
+        db.delete(cart_item)
+        db.commit()
+
+        return {"detail": "Товар удалён из корзины"}, 200
